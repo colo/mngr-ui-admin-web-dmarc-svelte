@@ -1,0 +1,54 @@
+{
+  "_args": [
+    [
+      "git+https://github.com/colo/mngr-ui-admin-charts.git",
+      "/home/colo/projects/mngr-ui-admin"
+    ]
+  ],
+  "_from": "git+https://github.com/colo/mngr-ui-admin-charts.git",
+  "_id": "mngr-ui-admin-charts@0.0.1",
+  "_inBundle": false,
+  "_integrity": "",
+  "_location": "/mngr-ui-admin-charts",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "git",
+    "raw": "mngr-ui-admin-charts@git+https://github.com/colo/mngr-ui-admin-charts.git",
+    "name": "mngr-ui-admin-charts",
+    "escapedName": "mngr-ui-admin-charts",
+    "rawSpec": "git+https://github.com/colo/mngr-ui-admin-charts.git",
+    "saveSpec": "git+https://github.com/colo/mngr-ui-admin-charts.git",
+    "fetchSpec": "https://github.com/colo/mngr-ui-admin-charts.git",
+    "gitCommittish": null
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "git+https://github.com/colo/mngr-ui-admin-charts.git#93d7c4ad65063ca05b230f3addbda5856261b4a9",
+  "_spec": "mngr-ui-admin-charts@git+https://github.com/colo/mngr-ui-admin-charts.git",
+  "_where": "/home/colo/projects/mngr-ui-admin-web-tabler",
+  "author": {
+    "name": "Luciano Bueno"
+  },
+  "bugs": {
+    "url": "https://github.com/colo/mngr-ui-admin-charts/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "mootools": "^1.5.2"
+  },
+  "deprecated": false,
+  "description": "",
+  "homepage": "https://github.com/colo/mngr-ui-admin-charts#readme",
+  "license": "ISC",
+  "main": "index.js",
+  "name": "mngr-ui-admin-charts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/colo/mngr-ui-admin-charts.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.0.1"
+}
