@@ -142,6 +142,7 @@
   </div>
 </div>
 <!-- </section> -->
+{#if ds && ds.report_id === undefined}
 	<div class="grid grid-cols-3 gap-4">
 		<div class="card shadow-lg">
 			<figure>
@@ -233,7 +234,21 @@
 				</div>
 			</div>
 		</div>
-
+{:else}
+	<div class="card shadow-lg">
+		<div class="card-body">
+			<div class="flex md:ml-auto md:mr-0 mx-auto items-center flex-shrink-0 space-x-4">
+				<button class="btn btn-circle btn-xs" on:click="{setReportID}">
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
+				</button>
+			</div>
+			<div id="JsonViewer">
+			</div>
+		</div>
+	</div>
+{/if}
 	<div class="card shadow-lg">
 		<div class="card-body">
 			<DataTable options={tableOptions} dataSet={tableData} groupColumn={0}/>
@@ -275,6 +290,7 @@
 <script>
 // import Flatpickr from '@components/Flatpickr';
 // let datePicker
+import JsonViewer from 'json-viewer-js'
 import flatpickr from 'flatpickr'
 import 'flatpickr/dist/flatpickr.css';
 import 'flatpickr/dist/themes/material_blue.css';
@@ -318,25 +334,18 @@ let dmarc_info = []
 
 import {router} from '@spaceavocado/svelte-router'
 
-// let setDates = function (event) {
-// 	let dates = event.detail[0]
-// 	debug('setDates', dates, date)
-//   if (dates.length > 1 && dates[0].getTime() !== dates[1].getTime()) {
-//     debug('setDates both', dates)
-//     ds.start_time = dates[0].getTime()
-//     ds.current_time = dates[1].getTime() + DAY // + DAY to include full day on selected day
-//   } else {
-//     debug('setDates current', dates)
-//     ds.current_time = dates[0].getTime() + DAY // + DAY to include full day on selected day
-//     ds.start_time = undefined
-//   }
-//
-//   if ($router.currentRoute.query.start_time !== ds.start_time || $router.currentRoute.query.current_time !== ds.current_time) {
-//     $router.replace({ query: { ...$router.currentRoute.query, start_time: ds.start_time, current_time: ds.current_time}}) //.catch(err => { debug('setDates', err) })
-//   }
-//
-//   ds.pipelines[ds.id].fireEvent('onOnce')
-// }
+let setReportID = function (id) {
+	id = (id === undefined || id.target) ? '' : id
+	debug('setReportID', id)
+
+	$router.replace({ query: { ...$router.currentRoute.query, report_id: id}}) //.catch(err => { debug('setDates', err) })
+
+	if (ds !== undefined) { ds.report_id = (id === '') ? undefined : id }
+
+	if (id !== undefined && ds !== undefined) {
+		ds.pipelines[ds.id].fireEvent('onOnce')
+	}
+}
 
 let setHosts = function () {
 	debug('setHosts', $router.currentRoute.query.host)
@@ -453,6 +462,8 @@ let old_filters = {
 	host: {}
 }
 
+// let report_id = undefined
+// let report = undefined
 
 let hosts = []
 let domains = []
@@ -665,6 +676,22 @@ const tableOptions = {
 
   columns: [
 		{ data: 'domain' },
+		{
+      // title: 'Host',
+      data: 'id',
+      render: function (data, type, row, meta) {
+        // return format(data, 'E dd/MM/yyyy H:mm O')
+        if (type === 'display') {
+          // return `<a class="link link-primary open-item" href="javascript:void(0);" data-item-id=${row.id}>${data}</a>`
+          return `<button class="btn btn-ghost open-item" data-item-id=${data}>
+						<!-- Download SVG icon from http://tabler-icons.io/i/eye -->
+						<svg xmlns="http://www.w3.org/2000/svg" class="icon" data-item-id=${data} width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="2" /><path d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7" /></svg>
+					</button>`
+        } else {
+          return data
+        }
+      }
+    },
     {
       title: 'Host',
       data: 'host'
@@ -717,7 +744,7 @@ const tableOptions = {
     //   className: 'dt-center'
     // },
     {
-      targets: [1, 2],
+      targets: [1, 2, 3],
       className: 'dt-center'
     },
     // {
@@ -731,7 +758,7 @@ const tableOptions = {
     // },
     { 'visible': false, 'targets': 0 },
     {
-      'targets': [3, 4, 5],
+      'targets': [4, 5, 6],
       'searchable': false,
       className: 'dt-body-center'
     }
@@ -740,6 +767,15 @@ const tableOptions = {
   'order': [[ 2, 'desc' ], [ 0, 'asc' ]],
   'displayLength': 10,
   'drawCallback': function (settings) {
+		let els = document.getElementsByClassName('open-item')
+    debug('ELS', els)
+    Array.each(els, function (el) {
+      el.addEventListener('click', function (e) {
+        debug('open-item', e.target.dataset.itemId)
+        setReportID(e.target.dataset.itemId)
+      })
+    })
+
     let api = this.api()
     let rows = api.rows({page: 'current'}).nodes()
     let last = null
@@ -771,6 +807,9 @@ const DS = new Class({
   dmarc: [],
 
 	flatpickr: undefined,
+
+	report_id: undefined,
+	report: undefined,
 
 	components: {
     'all': [
@@ -807,6 +846,9 @@ const DS = new Class({
         }
       }
     }.bind(this))
+
+		debug('initialize DS', $router.currentRoute.query)
+		if ($router.currentRoute.query.report_id && $router.currentRoute.query.report_id !== 'undefined') { this.report_id = decodeURIComponent($router.currentRoute.query.report_id) }
 
 		if ($router.currentRoute.query.start_time && $router.currentRoute.query.start_time !== 'undefined') { this.start_time = $router.currentRoute.query.start_time * 1 }
 
@@ -972,12 +1014,33 @@ const DS = new Class({
 		}
 
 		this.pipelines[this.id].fireEvent('onOnce')
+	},
+	getReportID: function(){
+		return this.report_id
+	},
+	setReportDoc: function(doc){
+		this.report = doc
+		let container = document.getElementById('JsonViewer')
+    debug('watch report', container)
+    if (container !== null && container !== undefined) {
+			while (container.lastElementChild) {
+				container.removeChild(container.lastElementChild);
+			}
+      let viewer = new JsonViewer({
+        container: container,
+        data: JSON.stringify(this.report.data.records),
+        theme: 'light',
+        expand: true
+      })
+    }
 	}
 })
 
 import { onMount } from 'svelte'
+let ds
+
 onMount(async () => {
-	let ds = new DS()
+	ds = new DS()
 })
 </script>
 

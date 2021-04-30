@@ -29,6 +29,11 @@ const generic_callback = function (data, metadata, key, vm) {
     // dmarc_info_callback(data, metadata, key, vm)
     // if (data.dmarc[0].metadata.timestamp * 1 !== vm.datePickerMinDate * 1) { vm.datePickerMinDate = data.dmarc[0].metadata.timestamp }
     vm.setDatePickerMinDate( data.dmarc[0].metadata.timestamp )
+  } else if (key === 'dmarc.report') {
+    debug('GENERIC CALLBACK data REPORT %s %o', key, data, metadata)
+    // dmarc_info_callback(data, metadata, key, vm)
+    // if (data.dmarc[0].metadata.timestamp * 1 !== vm.datePickerMinDate * 1) { vm.datePickerMinDate = data.dmarc[0].metadata.timestamp }
+    vm.setReportDoc( data.dmarc[0] )
   }
   /**
 	* graphql
@@ -331,139 +336,64 @@ const dmarc_periodical = {
   callback: generic_callback
 
 }
+const dmarc_report = {
+  params: function (_key, vm) {
+    debug('PERIODICAL dmarc_report %o %o', _key, vm)
 
-// const dmarc_summary_periodical = {
-//   params: function (_key, vm) {
-//     // debug('PERIODICAL dmarc_summary_periodical %o %o', _key, vm)
-//
-//     // const MINUTE = 60000
-//
-//     let source
-//     let key
-//
-//     if (!_key) {
-//       // key = ['host.periodical', 'config.range', 'minute.range']
-//       key = ['os.periodical', 'logs.periodical'] //, 'minute.range'
-//     }
-//
-//     let filter = [
-//       // "this.r.row('metadata')('path').eq('os.memory').or(this.r.row('metadata')('path').eq('os.cpus'))"
-//     ]
-//
-//     if (vm.selected_dmarc && vm.selected_dmarc.length > 0) {
-//       let dmarc_filter
-//       Array.each(vm.selected_dmarc, function (host) {
-//         if (dmarc_filter === undefined) {
-//           dmarc_filter = "this.r.row('metadata')('host').eq('" + host + "')"
-//         } else {
-//           dmarc_filter += ".or(this.r.row('metadata')('host').eq('" + host + "')"
-//         }
-//       })
-//
-//       if (vm.selected_dmarc.length > 1) { // close each 'or'
-//         Array.each(vm.selected_dmarc, function (host, index) {
-//           if (index < vm.selected_dmarc.length - 1) { dmarc_filter += ')' }
-//         })
-//       }
-//       filter.push(dmarc_filter)
-//     }
-//
-//     debug('dmarc_summary_periodical FILTER ', filter)
-//
-//     let os_filter = Array.clone(filter)
-//     let logs_filter = Array.clone(filter)
-//     logs_filter.push({ 'metadata': { 'path': 'logs.nginx' } })
-//
-//     if (
-//       _key
-//     ) {
-//       switch (_key) {
-//         case 'os.periodical':
-//           source = [{
-//             params: { id: _key },
-//             path: 'all',
-//             // range: 'posix ' + roundMilliseconds(Date.now() - (6 * SECOND)) + '-' + roundMilliseconds(Date.now() - SECOND) + '/*',
-//             range: 'posix ' + vm.round(vm.end() - vm.refresh) + '-' + vm.round(vm.end()) + '/*',
-//             query: {
-//               'from': 'os',
-//               // 'register': 'changes',
-//               // 'format': 'stat',
-//               'index': false,
-//               /**
-//               * right now needed to match OUTPUT 'id' with this query (need to @fix)
-//               **/
-//               'q': [
-//                 // {
-//                 //   'metadata': [
-//                 //     'timestamp',
-//                 //     'path'
-//                 //   ]
-//                 // },
-//                 // 'metadata',
-//                 'data',
-//                 {'metadata': ['host', 'timestamp', 'path']}
-//               ],
-//               'transformation': [
-//                 {
-//                   'orderBy': { 'index': 'r.desc(timestamp)' }
-//                 }
-//               ],
-//               'filter': os_filter
-//
-//             }
-//           }]
-//           break
-//
-//         case 'logs.periodical':
-//           source = [{
-//             params: { id: _key },
-//             path: 'all',
-//             // range: 'posix ' + roundMilliseconds(Date.now() - (6 * SECOND)) + '-' + roundMilliseconds(Date.now() - SECOND) + '/*',
-//             range: 'posix ' + vm.round(vm.end() - vm.refresh) + '-' + vm.round(vm.end()) + '/*',
-//             query: {
-//               'from': 'logs',
-//               // 'register': 'changes',
-//               // 'format': 'stat',
-//               'index': false,
-//               /**
-//                 * right now needed to match OUTPUT 'id' with this query (need to @fix)
-//                 **/
-//               'q': [
-//                 // {
-//                 //   'metadata': [
-//                 //     'timestamp',
-//                 //     'path'
-//                 //   ]
-//                 // },
-//                 // 'metadata',
-//                 'data',
-//                 {'metadata': ['host', 'timestamp', 'path', 'domain']}
-//               ],
-//               'transformation': [
-//                 {
-//                   'orderBy': { 'index': 'r.desc(timestamp)' }
-//                 }
-//               ],
-//               'filter': logs_filter
-//
-//             }
-//           }]
-//           break
-//       }
-//     }
-//
-//     // debug('MyChart periodical KEY ', key, source)
-//
-//     return { key, source }
-//   },
-//   callback: generic_callback
-//
-// }
+    // const MINUTE = 60000
+
+    let source
+    let key
+
+    if (!_key) {
+      // key = ['host.report', 'config.range', 'minute.range']
+      key = ['dmarc.report'] //, 'minute.range'
+    }
+
+    if (
+      _key && vm.getReportID() && vm.getReportID() !== undefined
+    ) {
+      let filter = []
+
+      filter.push("this.r.row('metadata')('id').eq('" + vm.getReportID() + "')")
+
+      debug('dmarc_report FILTER ', filter)
+
+      switch (_key) {
+        case 'dmarc.report':
+          source = [{
+            params: { id: _key },
+            // path: 'all',
+            query: {
+              'from': 'dmarc',
+              'index': false,
+              /**
+              * right now needed to match OUTPUT 'id' with this query (need to @fix)
+              **/
+              'q': [
+                'data',
+                'metadata'
+              ],
+              'filter': filter
+            }
+          }]
+          break
+      }
+    }
+
+    // debug('dmarc_report ', key, source)
+
+    return { key, source }
+  },
+  callback: generic_callback
+
+}
 
 const once = [
 	dmarc_info,
   dmarc_first,
   dmarc_periodical,
+	dmarc_report
 ]
 
 const periodical = [
