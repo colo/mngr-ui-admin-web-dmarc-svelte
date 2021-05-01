@@ -52,37 +52,48 @@ export default new Class({
 	},
 	start: function () {
 		if (this.start_time === undefined) {
-			if (this.period === 'second' || this.period === 'periodical') {
-				return (this.end() - SECOND >= 0) ? this.end() - SECOND : 0
-			} else if (this.period === 'minute') {
-				return (this.end() - MINUTE >= 0) ? this.end() - MINUTE : 0
-			} else if (this.period === 'hour') {
-				return (this.end() - HOUR >= 0) ? this.end() - HOUR : 0
-			} else {
-				return (this.end() - DAY >= 0) ? this.end() - DAY : 0
-			}
-		} else {
-			return this.start_time
-		}
+      if (this.period === 'second' || this.period === 'periodical') {
+        return (this.end() - SECOND >= 0) ? this.end() - SECOND : 0
+      } else if (this.period === 'minute') {
+        return (this.end() - MINUTE >= 0) ? this.end() - MINUTE : 0
+      } else if (this.period === 'hour') {
+        return (this.end() - HOUR >= 0) ? this.end() - HOUR : 0
+      } else if (this.period === 'day') {
+        return (this.end() - DAY >= 0) ? this.end() - DAY : 0
+      } else if (this.period === 'secondly') {
+        return roundMilliseconds(this.end())
+      } else if (this.period === 'minutely') {
+        return roundSeconds(this.end())
+      } else if (this.period === 'hourly') {
+        return roundMinutes(this.end())
+      } else if (this.period === 'daily') {
+        return roundHours(this.end())
+      }
+    } else {
+      return this.start_time
+    }
 	},
 	end: function () {
 		if (this.current_time === undefined) {
-			// return Date.now()
-			if (this.period === 'second' || this.period === 'periodical') {
-				// return Date.now() - SECOND
-				return roundMilliseconds(Date.now()) - (5 * SECOND) // use "5 seconds ago" to really get all documents (DB may be behind writing/reading )
-			} else if (this.period === 'minute') {
-				// return Date.now() - (2 * MINUTE)
-				return roundSeconds(Date.now())
-			} else if (this.period === 'hour') {
-				// return Date.now() - HOUR
-				return roundMinutes(Date.now())
-			} else {
-				// return Date.now() - DAY
-				return roundHours(Date.now())
-			}
-		} else {
-			return this.current_time
-		}
+      // return Date.now()
+      if (this.period === 'second' || this.period === 'periodical') {
+        // return Date.now() - SECOND
+        return roundMilliseconds(Date.now()) - (5 * SECOND) // use "5 seconds ago" to really get all documents (DB may be behind writing/reading )
+      } else {
+        return Date.now()
+      }
+      // else if (this.period === 'minute') {
+      //   // return Date.now() - (2 * MINUTE)
+      //   return roundSeconds(Date.now())
+      // } else if (this.period === 'hour') {
+      //   // return Date.now() - HOUR
+      //   return roundMinutes(Date.now())
+      // } else {
+      //   // return Date.now()
+      //   return roundHours(Date.now())
+      // }
+    } else {
+      return this.current_time
+    }
 	},
 })

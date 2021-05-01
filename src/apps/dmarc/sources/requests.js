@@ -34,6 +34,11 @@ const generic_callback = function (data, metadata, key, vm) {
     // dmarc_info_callback(data, metadata, key, vm)
     // if (data.dmarc[0].metadata.timestamp * 1 !== vm.datePickerMinDate * 1) { vm.datePickerMinDate = data.dmarc[0].metadata.timestamp }
     vm.setReportDoc( data.dmarc[0] )
+  } else if (key === 'hosts.info') {
+    debug('GENERIC CALLBACK HOSTS INFO %s %o', key, data, metadata)
+    // dmarc_info_callback(data, metadata, key, vm)
+    // if (data.dmarc[0].metadata.timestamp * 1 !== vm.datePickerMinDate * 1) { vm.datePickerMinDate = data.dmarc[0].metadata.timestamp }
+    vm.setServers ( data.hosts )
   }
   /**
 	* graphql
@@ -45,6 +50,59 @@ const generic_callback = function (data, metadata, key, vm) {
   // if (key === 'os.periodical') { os_callback(data, metadata, key, vm) }
   //
   // if (key === 'logs.periodical') { web_callback(data, metadata, key, vm) }
+}
+
+const hosts_info = {
+  params: function (_key, vm) {
+    debug('PERIODICAL hosts_info %o %o', _key, vm)
+
+    // const MINUTE = 60000
+
+    let source
+    let key
+
+    if (!_key) {
+      // key = ['host.info', 'config.range', 'minute.range']
+      key = ['hosts.info'] //, 'minute.range'
+    }
+
+    if (
+      _key
+    ) {
+      switch (_key) {
+        case 'hosts.info':
+          source = [{
+            params: { id: _key },
+            // path: 'all',
+            // range: 'posix ' + vm.start() + '-' + vm.end() + '/*',
+            query: {
+              'from': 'hosts',
+              'index': false,
+              /**
+              * right now needed to match OUTPUT 'id' with this query (need to @fix)
+              **/
+              'q': [
+                {'data': ['networkInterfaces']},
+                {'metadata': ['host']}
+              ],
+              // 'transformation': [
+              //   {
+              //     'orderBy': { 'index': 'r.desc(timestamp)' }
+              //   }
+              // ],
+              // 'filter': filter
+            }
+          }]
+          break
+      }
+    }
+
+    // debug('dmarc_info ', key, source)
+
+    return { key, source }
+  },
+  callback: generic_callback
+
 }
 
 const dmarc_info = {
@@ -393,13 +451,16 @@ const once = [
 	dmarc_info,
   dmarc_first,
   dmarc_periodical,
-	dmarc_report
+	dmarc_report,
+	hosts_info
 ]
 
 const periodical = [
-  // dmarc_info,
-  // dmarc_periodical,
-  // dmarc_summary_periodical
+	hosts_info,
+  dmarc_info,
+  dmarc_first,
+  dmarc_periodical,
+  dmarc_report
 ]
 
 const requests = {

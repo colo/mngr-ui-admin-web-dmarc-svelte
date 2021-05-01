@@ -244,6 +244,32 @@
 					</svg>
 				</button>
 			</div>
+			<div class="md:p-8 p-6 bg-white flex justify-between dark:bg-gray-800 md:items-center md:flex-row flex-col gap-12">
+				<div>
+					<span class="text-bold text-gray-700 dark:text-gray-400 block">
+						{report_email}
+					</span>
+					<span class="text-yellow-500 text-4xl md:text-5xl mt-2 font-black block">
+						{report_org}
+					</span>
+				</div>
+				<div class="self-end">
+					<div class="md:text-right text-left md:block">
+						<p class="text-xl md:mb-2 mb-0 dark:text-gray-100 flex items-center increase">
+							<!-- <svg width="20" height="20" fill="currentColor" class="h-6 w-6 text-red-500 mr-2" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
+							<path d="M491 1536l91-91-235-235-91 91v107h128v128h107zm523-928q0-22-22-22-10 0-17 7l-542 542q-7 7-7 17 0 22 22 22 10 0 17-7l542-542q7-7 7-17zm-54-192l416 416-832 832h-416v-416zm683 96q0 53-37 90l-166 166-416-416 166-165q36-38 90-38 53 0 91 38l235 234q37 39 37 91z">
+							</path>
+							</svg> -->
+							{report_domain}
+						</p>
+					</div>
+					<p class="text-lg text-gray-600 md:text-right text-left dark:text-gray-400 md:block inline-block md:mb-0">
+						{ report_policy }
+					</p>
+				</div>
+			</div>
+
+			<DataTable id="reportTable" options={reportTableOptions} dataSet={reportTableData} />
 			<div id="JsonViewer">
 			</div>
 		</div>
@@ -251,7 +277,7 @@
 {/if}
 	<div class="card shadow-lg">
 		<div class="card-body">
-			<DataTable options={tableOptions} dataSet={tableData} groupColumn={0}/>
+			<DataTable id="rangeReportsTable" options={tableOptions} dataSet={tableData} groupColumn={0}/>
 		</div>
 	</div>
 
@@ -667,6 +693,91 @@ $: if(dmarc_data.length > 0 ) {
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
+let report_policy =  ''
+let report_domain =  ''
+let report_email =  ''
+let report_org =  ''
+let reportTableData =  []
+let reportTableOptions =  {
+  deferRender: true,
+  // stateSave: true,
+  responsive: true,
+  data: [],
+
+  columns: [
+    {
+      data: 'disposition',
+      title: 'Disposition',
+      'width': '10%',
+      render: function (data, type) {
+        if (type === 'display') {
+          let badge = (data === 'none') ? 'badge-success' : (data === 'quarantine') ? 'badge-warning' : 'badge-error'
+          return `<div class="badge ${badge}">${data}</div> `
+        } else {
+          return data
+        }
+      }
+    },
+    {
+      data: 'ip',
+      title: 'IP',
+      render: function (data, type) {
+        if (type === 'display') {
+          if (data.ip && data.host) {
+            return `<div class="badge badge-info">${data.host}</div> ${data.ip}`
+          } else {
+            return data.ip
+          }
+        } else {
+          return data.ip
+        }
+      }
+    },
+    { data: 'count', title: 'Count' },
+    { data: 'identifiers', title: 'Identifiers' },
+    { data: 'dkim_domain', title: 'DKIM Domain' },
+    { data: 'dkim_selector', title: 'DKIM Selector' },
+    {
+      data: 'dkim_result',
+      title: 'DKIM Result',
+      'width': '10%',
+      render: function (data, type) {
+        if (type === 'display') {
+          let badge = (data === 'pass') ? 'badge-success' : 'badge-error'
+          return `<div class="badge ${badge}">${data}</div> `
+        } else {
+          return data
+        }
+      }
+    },
+    { data: 'spf_domain', title: 'SPF Domain' },
+    {
+      data: 'spf_result',
+      title: 'SPF Result',
+      'width': '10%',
+      render: function (data, type) {
+        if (type === 'display') {
+          let badge = (data === 'pass') ? 'badge-success' : 'badge-error'
+          return `<div class="badge ${badge}">${data}</div> `
+        } else {
+          return data
+        }
+      }
+    },
+
+  ],
+
+  'lengthMenu': [[10, 25, 50, -1], [10, 25, 50, 'All']],
+  'columnDefs': [
+    {
+      targets: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      className: 'dt-center'
+    },
+  ],
+  'order': [[ 2, 'desc' ]],
+  'displayLength': 10,
+}
+
 const tableOptions = {
 	deferRender: true,
 	responsive: true,
@@ -674,16 +785,24 @@ const tableOptions = {
 
   data: [],
 
-  columns: [
-		{ data: 'domain' },
-		{
+	columns: [
+    { data: 'domain' },
+    // {
+    //   title: 'Domain',
+    //   data: 'domain',
+    //   render: function (data, type) {
+    //     // return format(data, 'E dd/MM/yyyy H:mm O')
+    //     return `<a class="link link-primary">${data}</a>`
+    //   }
+    // },
+    {
       // title: 'Host',
       data: 'id',
       render: function (data, type, row, meta) {
         // return format(data, 'E dd/MM/yyyy H:mm O')
         if (type === 'display') {
           // return `<a class="link link-primary open-item" href="javascript:void(0);" data-item-id=${row.id}>${data}</a>`
-          return `<button class="btn btn-ghost open-item" data-item-id=${data}>
+          return `<button class="btn btn-ghost  open-item" data-item-id=${data}>
 						<!-- Download SVG icon from http://tabler-icons.io/i/eye -->
 						<svg xmlns="http://www.w3.org/2000/svg" class="icon" data-item-id=${data} width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="2" /><path d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7" /></svg>
 					</button>`
@@ -694,22 +813,22 @@ const tableOptions = {
     },
     {
       title: 'Host',
-      data: 'host'
+      data: 'host',
     },
-    // { data: 'range' },
-		{
+    {
       title: 'Time',
       data: 'timestamp',
-      render: function (data, type) {
+      render: function (data, type, row, meta) {
         // return format(data, 'E dd/MM/yyyy H:mm O')
         if (type === 'display') {
+          // debug('table timestamp', row, meta)
           return format(data, 'PPPP p', {locale: es})
         } else {
           return data
         }
       }
     },
-		{
+    {
       title: 'None',
       data: 'none',
       'width': '10%',
@@ -783,7 +902,7 @@ const tableOptions = {
     api.column(0, {page: 'current'}).data().each(function (group, i) {
       if (last !== group) {
         jquery(rows).eq(i).before(
-          '<tr class="group"><td colspan="5">' + group + '</td></tr>'
+          '<tr class="group"><td colspan="6">' + group + '</td></tr>'
         )
 
         last = group
@@ -801,8 +920,8 @@ const DS = new Class({
 	id: 'input.dmarc.periodical',
   path: 'all',
   // refresh: SECOND,
-	refresh: SECOND * 5,
-  period: 'DAY',
+	refresh: MINUTE,
+  period: 'daily',
 
   dmarc: [],
 
@@ -810,6 +929,7 @@ const DS = new Class({
 
 	report_id: undefined,
 	report: undefined,
+	servers: [],
 
 	components: {
     'all': [
@@ -1002,10 +1122,10 @@ const DS = new Class({
 		if (dates.length > 1 && dates[0].getTime() !== dates[1].getTime()) {
 			debug('setDates both', dates)
 			this.start_time = dates[0].getTime()
-			this.current_time = dates[1].getTime() + DAY // + DAY to include full day on selected day
+			this.current_time = dates[1].getTime() + DAY - MINUTE// + DAY to include full day on selected day
 		} else {
 			debug('setDates current', dates)
-			this.current_time = dates[0].getTime() + DAY // + DAY to include full day on selected day
+			this.current_time = dates[0].getTime() + DAY - MINUTE// + DAY to include full day on selected day
 			this.start_time = undefined
 		}
 
@@ -1021,18 +1141,68 @@ const DS = new Class({
 	setReportDoc: function(doc){
 		this.report = doc
 		let container = document.getElementById('JsonViewer')
-    debug('watch report', container)
+    debug('watch report', container, doc)
+		reportTableData = []
+    report_domain = doc.data.policy.domain
+    report_policy = `adkim: ${doc.data.policy.adkim} | aspf: ${doc.data.policy.aspf} | p: ${doc.data.policy.p} | pct: ${doc.data.policy.pct} | sp: ${doc.data.policy.sp}`
+    report_email = doc.data.report.email
+    report_org = doc.data.report.org
+
+		Object.each(doc.data.records, function (data, disposition) {
+      Array.each(data, function (row) {
+        let ip = row.ip
+        let ip_record = {ip: ip, host: undefined}
+        if (this.servers.length > 0) {
+          Array.each(this.servers, function (server) {
+            let server_ips = []
+            Object.each(server.data.networkInterfaces, function (iface) {
+              if (Array.isArray(iface)) {
+                Array.each(iface, function (_if) {
+                  server_ips.push(_if.address)
+                })
+              } else {
+                Array.each(iface.if, function (_if) {
+                  server_ips.push(_if.address)
+                })
+              }
+            })
+
+            if (server_ips.contains(ip)) {
+              ip_record.host = server.metadata.host
+            }
+          })
+        }
+
+        let reg = {
+          disposition: disposition,
+          count: row.count,
+          ip: ip_record,
+          identifiers: JSON.stringify(row.identifiers),
+          'dkim_domain': (row.results.dkim && row.results.dkim.domain) ? row.results.dkim.domain : '-',
+          'dkim_selector': (row.results.dkim && row.results.dkim.selector) ? row.results.dkim.selector : '-',
+          'dkim_result': (row.results.dkim && row.results.dkim.result) ? row.results.dkim.result : '-',
+          'spf_domain': (row.results.spf && row.results.spf.domain) ? row.results.spf.domain : '-',
+          'spf_result': (row.results.spf && row.results.spf.result) ? row.results.spf.result : '-',
+        }
+
+        reportTableData.push(reg)
+      }.bind(this))
+    }.bind(this))
+
     if (container !== null && container !== undefined) {
 			while (container.lastElementChild) {
 				container.removeChild(container.lastElementChild);
 			}
       let viewer = new JsonViewer({
         container: container,
-        data: JSON.stringify(this.report.data.records),
+        data: JSON.stringify(this.report.data),
         theme: 'light',
-        expand: true
+        expand: false
       })
     }
+	},
+	setServers: function(servers){
+		this.servers = servers
 	}
 })
 
