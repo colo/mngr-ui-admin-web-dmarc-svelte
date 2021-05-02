@@ -1051,7 +1051,7 @@ const DS = new Class({
 
           // type: 'minute', // second || minute || hour || day || once
           requests: {
-            periodical: SECOND * 5,
+            periodical: this.refresh,
             // periodical: function (dispatch) {
             //   // return cron.schedule('14,29,44,59 * * * * *', dispatch);//every 15 secs
             //   return cron.schedule('*/10 * * * * *', dispatch)// every 20 secs

@@ -460,7 +460,7 @@ const periodical = [
   dmarc_info,
   dmarc_first,
   dmarc_periodical,
-  dmarc_report
+  // dmarc_report
 ]
 
 const requests = {
