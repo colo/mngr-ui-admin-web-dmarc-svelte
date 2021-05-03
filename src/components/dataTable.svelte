@@ -30,7 +30,7 @@ export let options = {
 export let groupColumn = undefined
 
 let table = undefined
-$: if (dataSet.length > 0 && table !== undefined) {
+$: if (dataSet && table !== undefined) {
 	table.clear()
 	table.rows.add(dataSet)
 	table.draw()

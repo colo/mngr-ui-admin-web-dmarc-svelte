@@ -560,138 +560,139 @@ $: if(filters.domain && JSON.stringify(filters.domain) !== JSON.stringify(old_fi
 	old_filters.domain = JSON.parse(JSON.stringify(filters.domain))
 }
 
-$: if(dmarc_info.length > 0 ) {
-	debug('dmarc_info', dmarc_info)
-	hosts = []
-	domains = []
-  let count_domains = {}
-  let count_hosts = {}
-  let count_disposition = {none: 0, quarantine: 0, reject: 0}
-  // this.total_records_count = 0
-  // this.total_ips = []
+// $: if(dmarc_info.length > 0 ) {
+// 	debug('dmarc_info', dmarc_info)
+// 	hosts = []
+// 	domains = []
+//   let count_domains = {}
+//   let count_hosts = {}
+//   let count_disposition = {none: 0, quarantine: 0, reject: 0}
+//   // this.total_records_count = 0
+//   // this.total_ips = []
+//
+//   Array.each(dmarc_info, function (row) {
+//     let domain = row.metadata.domain
+//     let host = row.metadata.host
+//
+//     // count_disposition.none += (row.data.records && row.data.records.none) ? row.data.records.none.length : 0
+//     // count_disposition.quarantine += (row.data.records && row.data.records.quarantine) ? row.data.records.quarantine.length : 0
+//     // count_disposition.reject += (row.data.records && row.data.records.reject) ? row.data.records.reject.length : 0
+//     //
+//     // Object.each(row.data.records, function (disposition) {
+//     //   Array.each(disposition, function (record) {
+//     //     this.total_records_count += record.count
+//     //     this.total_ips.combine([ record.ip])
+//     //   }.bind(this))
+//     // }.bind(this))
+//
+//     if (!count_domains[domain]) count_domains[domain] = 0
+//     count_domains[domain]++
+//     // this.domainsPieLabels.combine([domain])
+//
+//     if (host && host !== undefined && host !== null) {
+//       if (!count_hosts[host]) count_hosts[host] = 0
+//       count_hosts[host]++
+//       // this.hostsPieLabels.combine([host])
+//     }
+//   })
+//
+//   // this.total_diposition_count += count_disposition.none + count_disposition.quarantine + count_disposition.reject
+//
+//   hosts = Object.keys(count_hosts)
+//
+//   domains = Object.keys(count_domains)
+// }
 
-  Array.each(dmarc_info, function (row) {
-    let domain = row.metadata.domain
-    let host = row.metadata.host
-
-    // count_disposition.none += (row.data.records && row.data.records.none) ? row.data.records.none.length : 0
-    // count_disposition.quarantine += (row.data.records && row.data.records.quarantine) ? row.data.records.quarantine.length : 0
-    // count_disposition.reject += (row.data.records && row.data.records.reject) ? row.data.records.reject.length : 0
-    //
-    // Object.each(row.data.records, function (disposition) {
-    //   Array.each(disposition, function (record) {
-    //     this.total_records_count += record.count
-    //     this.total_ips.combine([ record.ip])
-    //   }.bind(this))
-    // }.bind(this))
-
-    if (!count_domains[domain]) count_domains[domain] = 0
-    count_domains[domain]++
-    // this.domainsPieLabels.combine([domain])
-
-    if (host && host !== undefined && host !== null) {
-      if (!count_hosts[host]) count_hosts[host] = 0
-      count_hosts[host]++
-      // this.hostsPieLabels.combine([host])
-    }
-  })
-
-  // this.total_diposition_count += count_disposition.none + count_disposition.quarantine + count_disposition.reject
-
-  hosts = Object.keys(count_hosts)
-
-  domains = Object.keys(count_domains)
-}
-
-$: if(dmarc_data.length > 0 ) {
-	let data = []
-	let count_domains = {}
-  let count_hosts = {}
-  let count_disposition = {none: 0, quarantine: 0, reject: 0}
-	total_records_count = 0
-	total_ips = []
-	domainsPieLabels =[]
-
-  Array.each(dmarc_data, function (row, index) {
-		let domain = row.metadata.domain
-    let host = row.metadata.host
-
-		count_disposition.none += (row.data.records && row.data.records.none) ? row.data.records.none.length : 0
-    count_disposition.quarantine += (row.data.records && row.data.records.quarantine) ? row.data.records.quarantine.length : 0
-    count_disposition.reject += (row.data.records && row.data.records.reject) ? row.data.records.reject.length : 0
-
-    Object.each(row.data.records, function (disposition) {
-      Array.each(disposition, function (record) {
-        total_records_count += record.count
-        total_ips.combine([ record.ip])
-      })
-    })
-
-		if (!count_domains[domain]) count_domains[domain] = 0
-
-		count_domains[domain]++
-    domainsPieLabels.combine([domain])
-
-    if (host && host !== undefined && host !== null) {
-      if (!count_hosts[host]) count_hosts[host] = 0
-      count_hosts[host]++
-      // hostsPieLabels.combine([host])
-    }
-		//table data
-    let _data = Object.merge(row.metadata, {
-      none: (row.data.records && row.data.records.none) ? row.data.records.none.length : 0,
-      quarantine: (row.data.records && row.data.records.quarantine) ? row.data.records.quarantine.length : 0,
-      reject: (row.data.records && row.data.records.reject) ? row.data.records.reject.length : 0
-    })
-
-    data.push(_data)
-  })
-
-	total_ips_count = total_ips.length
-	total_diposition_count += count_disposition.none + count_disposition.quarantine + count_disposition.reject
-  total_hosts_count = Object.keys(count_hosts).length
-  total_domains_count = Object.keys(count_domains).length
-
-  domainsPieLabels.sort()
-  // hostsPieLabels.sort()
-
-  let domains_dataset = []
-  Array.each(domainsPieLabels, function (domain) {
-    domains_dataset.push(count_domains[domain])
-  })
-  // domainsPieDatasets = [{values: domains_dataset}]
-  domainsPieDatasetsTabular = domains_dataset // [{values: domains_dataset}]
-
-  // let hosts_dataset = []
-  // Array.each(hostsPieLabels, function (host) {
-  //   // hostsPieDatasets
-  //   hosts_dataset.push(count_hosts[host])
-  // })
-
-  hostsPieDatasets = [count_hosts]
-  dispositionDatasets = [count_disposition]
-  // hostsPieDatasets = [{values: hosts_dataset}]
-  // hostsPieDatasetsTabular = hosts_dataset // [{values: hosts_dataset}]
-
-  debug('dmarc_data domains', domainsPieLabels, count_domains, domains_dataset, total_ips)
-  debug('computed tableData', dmarc_data, data)
-
-	domainsPieWrapper = {
-		type: frappeChartsWrapper,
-		props: Object.merge({ options: Object.clone(frappePieConfig.options) }, {options: { data: { labels: domainsPieLabels } }})
-	}
-
-	hostsPieWrapper = {
-		type: frappeChartsWrapper,
-		props: { options: Object.clone(frappePieConfig.options) }
-	}
-
-	dispositionPieWrapper = {
-		type: frappeChartsWrapper,
-		props: { options: Object.merge(Object.clone(frappePieConfig.options), { colors: ['#31C4DD', '#FCB10E', '#FE7289'] }) }
-	}
-  tableData = data
-}
+// $: if(dmarc_data) {
+// 	let data = []
+// 	let count_domains = {}
+//   let count_hosts = {}
+//   let count_disposition = {none: 0, quarantine: 0, reject: 0}
+// 	total_records_count = 0
+// 	total_ips = []
+// 	domainsPieLabels = []
+// 	total_diposition_count = 0
+//
+//   Array.each(dmarc_data, function (row, index) {
+// 		let domain = row.metadata.domain
+//     let host = row.metadata.host
+//
+// 		count_disposition.none += (row.data.records && row.data.records.none) ? row.data.records.none.length : 0
+//     count_disposition.quarantine += (row.data.records && row.data.records.quarantine) ? row.data.records.quarantine.length : 0
+//     count_disposition.reject += (row.data.records && row.data.records.reject) ? row.data.records.reject.length : 0
+//
+//     Object.each(row.data.records, function (disposition) {
+//       Array.each(disposition, function (record) {
+//         total_records_count += record.count
+//         total_ips.combine([ record.ip])
+//       })
+//     })
+//
+// 		if (!count_domains[domain]) count_domains[domain] = 0
+//
+// 		count_domains[domain]++
+//     domainsPieLabels.combine([domain])
+//
+//     if (host && host !== undefined && host !== null) {
+//       if (!count_hosts[host]) count_hosts[host] = 0
+//       count_hosts[host]++
+//       // hostsPieLabels.combine([host])
+//     }
+// 		//table data
+//     let _data = Object.merge(row.metadata, {
+//       none: (row.data.records && row.data.records.none) ? row.data.records.none.length : 0,
+//       quarantine: (row.data.records && row.data.records.quarantine) ? row.data.records.quarantine.length : 0,
+//       reject: (row.data.records && row.data.records.reject) ? row.data.records.reject.length : 0
+//     })
+//
+//     data.push(_data)
+//   })
+//
+// 	total_ips_count = total_ips.length
+// 	total_diposition_count += count_disposition.none + count_disposition.quarantine + count_disposition.reject
+//   total_hosts_count = Object.keys(count_hosts).length
+//   total_domains_count = Object.keys(count_domains).length
+//
+//   domainsPieLabels.sort()
+//   // hostsPieLabels.sort()
+//
+//   let domains_dataset = []
+//   Array.each(domainsPieLabels, function (domain) {
+//     domains_dataset.push(count_domains[domain])
+//   })
+//   // domainsPieDatasets = [{values: domains_dataset}]
+//   domainsPieDatasetsTabular = domains_dataset // [{values: domains_dataset}]
+//
+//   // let hosts_dataset = []
+//   // Array.each(hostsPieLabels, function (host) {
+//   //   // hostsPieDatasets
+//   //   hosts_dataset.push(count_hosts[host])
+//   // })
+//
+//   hostsPieDatasets = [count_hosts]
+//   dispositionDatasets = [count_disposition]
+//   // hostsPieDatasets = [{values: hosts_dataset}]
+//   // hostsPieDatasetsTabular = hosts_dataset // [{values: hosts_dataset}]
+//
+//   debug('dmarc_data domains', domainsPieLabels, count_domains, domains_dataset, total_ips)
+//   debug('computed tableData', dmarc_data, data)
+//
+// 	domainsPieWrapper = {
+// 		type: frappeChartsWrapper,
+// 		props: Object.merge({ options: Object.clone(frappePieConfig.options) }, {options: { data: { labels: domainsPieLabels } }})
+// 	}
+//
+// 	hostsPieWrapper = {
+// 		type: frappeChartsWrapper,
+// 		props: { options: Object.clone(frappePieConfig.options) }
+// 	}
+//
+// 	dispositionPieWrapper = {
+// 		type: frappeChartsWrapper,
+// 		props: { options: Object.merge(Object.clone(frappePieConfig.options), { colors: ['#31C4DD', '#FCB10E', '#FE7289'] }) }
+// 	}
+//   tableData = data
+// }
 
 
 
@@ -1096,13 +1097,146 @@ const DS = new Class({
   },
   setDmarcData: function(h){
 		debug('setDmarcData %o', h)
-		if(h && h.length > 0)
-			dmarc_data = h
+		// if(h && h.length > 0)
+		dmarc_data = h
+
+		let data = []
+		let count_domains = {}
+		let count_hosts = {}
+		let count_disposition = {none: 0, quarantine: 0, reject: 0}
+		total_records_count = 0
+		total_ips = []
+		domainsPieLabels = []
+		total_diposition_count = 0
+
+		Array.each(dmarc_data, function (row, index) {
+			let domain = row.metadata.domain
+			let host = row.metadata.host
+
+			count_disposition.none += (row.data.records && row.data.records.none) ? row.data.records.none.length : 0
+			count_disposition.quarantine += (row.data.records && row.data.records.quarantine) ? row.data.records.quarantine.length : 0
+			count_disposition.reject += (row.data.records && row.data.records.reject) ? row.data.records.reject.length : 0
+
+			Object.each(row.data.records, function (disposition) {
+				Array.each(disposition, function (record) {
+					total_records_count += record.count
+					total_ips.combine([ record.ip])
+				})
+			})
+
+			if (!count_domains[domain]) count_domains[domain] = 0
+
+			count_domains[domain]++
+			domainsPieLabels.combine([domain])
+
+			if (host && host !== undefined && host !== null) {
+				if (!count_hosts[host]) count_hosts[host] = 0
+				count_hosts[host]++
+				// hostsPieLabels.combine([host])
+			}
+			//table data
+			let _data = Object.merge(row.metadata, {
+				none: (row.data.records && row.data.records.none) ? row.data.records.none.length : 0,
+				quarantine: (row.data.records && row.data.records.quarantine) ? row.data.records.quarantine.length : 0,
+				reject: (row.data.records && row.data.records.reject) ? row.data.records.reject.length : 0
+			})
+
+			data.push(_data)
+		})
+
+		total_ips_count = total_ips.length
+		total_diposition_count += count_disposition.none + count_disposition.quarantine + count_disposition.reject
+		total_hosts_count = Object.keys(count_hosts).length
+		total_domains_count = Object.keys(count_domains).length
+
+		domainsPieLabels.sort()
+		// hostsPieLabels.sort()
+
+		let domains_dataset = []
+		Array.each(domainsPieLabels, function (domain) {
+			domains_dataset.push(count_domains[domain])
+		})
+		// domainsPieDatasets = [{values: domains_dataset}]
+		domainsPieDatasetsTabular = domains_dataset // [{values: domains_dataset}]
+
+		// let hosts_dataset = []
+		// Array.each(hostsPieLabels, function (host) {
+		//   // hostsPieDatasets
+		//   hosts_dataset.push(count_hosts[host])
+		// })
+
+		hostsPieDatasets = [count_hosts]
+		dispositionDatasets = [count_disposition]
+		// hostsPieDatasets = [{values: hosts_dataset}]
+		// hostsPieDatasetsTabular = hosts_dataset // [{values: hosts_dataset}]
+
+		debug('dmarc_data domains', domainsPieLabels, count_domains, domains_dataset, total_ips)
+
+
+		domainsPieWrapper = {
+			type: frappeChartsWrapper,
+			props: Object.merge({ options: Object.clone(frappePieConfig.options) }, {options: { data: { labels: domainsPieLabels } }})
+		}
+
+		hostsPieWrapper = {
+			type: frappeChartsWrapper,
+			props: { options: Object.clone(frappePieConfig.options) }
+		}
+
+		dispositionPieWrapper = {
+			type: frappeChartsWrapper,
+			props: { options: Object.merge(Object.clone(frappePieConfig.options), { colors: ['#31C4DD', '#FCB10E', '#FE7289'] }) }
+		}
+
+		debug('computed tableData', dmarc_data, data)
+		tableData = data
+		
   },
 	setDmarcInfo: function(h){
 		debug('setDmarcInfo %o', h)
-		if(h && h.length > 0)
-			dmarc_info = h
+		// if(h && h.length > 0)
+		dmarc_info = h
+
+		debug('dmarc_info', dmarc_info)
+		hosts = []
+		domains = []
+		let count_domains = {}
+		let count_hosts = {}
+		let count_disposition = {none: 0, quarantine: 0, reject: 0}
+		// this.total_records_count = 0
+		// this.total_ips = []
+
+		Array.each(dmarc_info, function (row) {
+			let domain = row.metadata.domain
+			let host = row.metadata.host
+
+			// count_disposition.none += (row.data.records && row.data.records.none) ? row.data.records.none.length : 0
+			// count_disposition.quarantine += (row.data.records && row.data.records.quarantine) ? row.data.records.quarantine.length : 0
+			// count_disposition.reject += (row.data.records && row.data.records.reject) ? row.data.records.reject.length : 0
+			//
+			// Object.each(row.data.records, function (disposition) {
+			//   Array.each(disposition, function (record) {
+			//     this.total_records_count += record.count
+			//     this.total_ips.combine([ record.ip])
+			//   }.bind(this))
+			// }.bind(this))
+
+			if (!count_domains[domain]) count_domains[domain] = 0
+			count_domains[domain]++
+			// this.domainsPieLabels.combine([domain])
+
+			if (host && host !== undefined && host !== null) {
+				if (!count_hosts[host]) count_hosts[host] = 0
+				count_hosts[host]++
+				// this.hostsPieLabels.combine([host])
+			}
+		})
+
+		// this.total_diposition_count += count_disposition.none + count_disposition.quarantine + count_disposition.reject
+
+		hosts = Object.keys(count_hosts)
+
+		domains = Object.keys(count_domains)
   },
 	getFilters: function(){
 		let _filters = {}
