@@ -828,7 +828,7 @@ const tableOptions = {
         // return format(data, 'E dd/MM/yyyy H:mm O')
         if (type === 'display') {
           // debug('table timestamp', row, meta)
-          return format(data, 'PPPP p', {locale: es})
+          return format(data, 'PPPP HH:MM', {locale: es})
         } else {
           return data
         }
