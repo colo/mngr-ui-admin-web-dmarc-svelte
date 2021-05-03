@@ -927,7 +927,7 @@ const DS = new Class({
   path: 'all',
   // refresh: SECOND,
 	refresh: MINUTE,
-  period: 'daily',
+  period: 'day',
 
   dmarc: [],
 
@@ -1190,7 +1190,7 @@ const DS = new Class({
 
 		debug('computed tableData', dmarc_data, data)
 		tableData = data
-		
+
   },
 	setDmarcInfo: function(h){
 		debug('setDmarcInfo %o', h)
