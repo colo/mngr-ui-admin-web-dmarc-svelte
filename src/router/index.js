@@ -10,7 +10,7 @@ import createRouter from '@spaceavocado/svelte-router'
 
 createRouter({
 	mode: 'HISTORY',
-	basename: '/',
+	basename: '',
   routes
 })
 

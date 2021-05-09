@@ -8,6 +8,9 @@ const mode = process.env.NODE_ENV || 'development';
 const prod = mode === 'production';
 
 module.exports = {
+	devServer: {
+    historyApiFallback: true,
+  },
 	entry: {
 		bundle: ['./src/main.js']
 	},

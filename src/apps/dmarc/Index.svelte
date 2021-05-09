@@ -282,7 +282,7 @@
 {/if}
 	<div class="card shadow-lg">
 		<div class="card-body">
-			<DataTable id="rangeReportsTable" options={tableOptions} dataSet={tableData} groupColumn={0}/>
+			<DataTable id="rangeReportsTable" options={rangeReportsTableOptions} dataSet={rangeReportsTableData} groupColumn={0}/>
 		</div>
 	</div>
 
@@ -509,7 +509,7 @@ let domainsPieLabels = []
 
 let hostsPieDatasets = undefined
 let dispositionDatasets = undefined
-let tableData = []
+let rangeReportsTableData = []
 let domainsPieWrapper = {
 	type: frappeChartsWrapper,
 	props: {}
@@ -675,7 +675,7 @@ $: if(filters.domain && JSON.stringify(filters.domain) !== JSON.stringify(old_fi
 //   // hostsPieDatasetsTabular = hosts_dataset // [{values: hosts_dataset}]
 //
 //   debug('dmarc_data domains', domainsPieLabels, count_domains, domains_dataset, total_ips)
-//   debug('computed tableData', dmarc_data, data)
+//   debug('computed rangeReportsTableData', dmarc_data, data)
 //
 // 	domainsPieWrapper = {
 // 		type: frappeChartsWrapper,
@@ -691,7 +691,7 @@ $: if(filters.domain && JSON.stringify(filters.domain) !== JSON.stringify(old_fi
 // 		type: frappeChartsWrapper,
 // 		props: { options: Object.merge(Object.clone(frappePieConfig.options), { colors: ['#31C4DD', '#FCB10E', '#FE7289'] }) }
 // 	}
-//   tableData = data
+//   rangeReportsTableData = data
 // }
 
 
@@ -784,7 +784,7 @@ let reportTableOptions =  {
   'displayLength': 10,
 }
 
-const tableOptions = {
+const rangeReportsTableOptions = {
 	deferRender: true,
 	responsive: true,
 	// stateSave: true,
@@ -1188,8 +1188,8 @@ const DS = new Class({
 			props: { options: Object.merge(Object.clone(frappePieConfig.options), { colors: ['#31C4DD', '#FCB10E', '#FE7289'] }) }
 		}
 
-		debug('computed tableData', dmarc_data, data)
-		tableData = data
+		debug('computed rangeReportsTableData', dmarc_data, data)
+		rangeReportsTableData = data
 
   },
 	setDmarcInfo: function(h){

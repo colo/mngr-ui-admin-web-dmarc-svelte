@@ -8,6 +8,7 @@
 * https://forum.vuejs.org/t/this-route-only-returns-null-in-app-vue/64006/3
 **/
 import Index from '@apps/dmarc/Index.svelte'
+import Hosts from '@apps/hosts/Index.svelte'
 import Error from '../views/Error.svelte'
 
 const routes = [
@@ -17,9 +18,14 @@ const routes = [
     name: 'index',
     // component: () => import('@apps/start/Index.vue'),
     component: Index,
-		// redirect: '/test'
+		// redirect: 'hosts'
     // meta: { layout: 'VerticalLayout' },
 
+  },
+	{
+    path: '/hosts',
+    name: 'hosts',
+    component: Hosts,
   },
   // Always leave this as last one,
   // but you can also remove it
